@@ -2,7 +2,8 @@
 .gradle
 /local.properties
 .idea/
-/app/google-services.json
+google-services.json
+google-maps-api.xml
 gradle.properties
 .DS_Store
 /build
