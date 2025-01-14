@@ -5,8 +5,6 @@ import android.content.Intent
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.firebase.ui.auth.AuthMethodPickerLayout
-import com.firebase.ui.auth.AuthUI
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -28,12 +26,16 @@ class AuthenticationViewModel : ViewModel() {
 
     val email = MutableLiveData<String>()
     val password = MutableLiveData<String>()
+    val confirmPassword = MutableLiveData<String>()
 
     private val _loginState = MutableLiveData<LoginState>()
     val loginState: LiveData<LoginState> = _loginState
 
     private val _errorMessage = MutableLiveData<String>()
     val errorMessage: LiveData<String> = _errorMessage
+
+    private val _navigateToRegister = MutableLiveData<Boolean>()
+    val navigateToRegister: LiveData<Boolean> get() = _navigateToRegister
 
     fun onLoginClick() {
         val email = email.value.orEmpty()
@@ -53,7 +55,29 @@ class AuthenticationViewModel : ViewModel() {
     }
 
     fun onRegisterClick() {
-        
+        val email = email.value.orEmpty()
+        val password = password.value.orEmpty()
+
+        // validation
+        if (email.isEmpty() || password.isEmpty() || confirmPassword.value.isNullOrEmpty() || password != confirmPassword.value) {
+            _loginState.value = LoginState.ERROR
+            return
+        }
+
+        _loginState.value = LoginState.LOADING
+        FirebaseAuth.getInstance()
+            .createUserWithEmailAndPassword(email, password)
+            .addOnCompleteListener { task ->
+                _loginState.value = if (task.isSuccessful) LoginState.SUCCESS else LoginState.ERROR
+            }
+    }
+
+    fun onNavigateToRegister() {
+        _navigateToRegister.value = true
+    }
+
+    fun onNavigationHandled() {
+        _navigateToRegister.value = false
     }
 
     fun onGoogleSignInClick() {

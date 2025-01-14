@@ -11,6 +11,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import com.udacity.project4.R
 import com.udacity.project4.databinding.FragmentLoginBinding
 import com.udacity.project4.locationreminders.RemindersActivity
@@ -48,6 +49,12 @@ class LoginFragment : Fragment() {
     }
 
     private fun observeLoginState() {
+        viewModel.navigateToRegister.observe(viewLifecycleOwner) { shouldNavigate ->
+            if (shouldNavigate) {
+                findNavController().navigate(R.id.action_loginFragment_to_signUpFragment)
+                viewModel.onNavigationHandled()
+            }
+        }
         // Observe Google Sign-In Intent
         viewModel.googleSignInIntent.observe(viewLifecycleOwner) { intent ->
             googleSignInLauncher.launch(intent)
@@ -63,9 +70,7 @@ class LoginFragment : Fragment() {
     }
 
     private fun navigateToReminders() {
-        val intent = Intent(activity, RemindersActivity::class.java)
-        startActivity(intent)
-        activity?.finish()
+        findNavController().navigate(R.id.action_loginFragment_to_reminderListFragment)
     }
 
     private fun showErrorMessage() {
