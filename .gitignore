@@ -1,0 +1,6 @@
+appInsightsSettings.xml
+deploymentTargetSelector.xml
+migrations.xml
+runConfigurations.xml
+starter/.idea
+google-services.json
