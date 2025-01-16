@@ -2,9 +2,16 @@ package com.udacity.project4.locationreminders.reminderslist
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
+import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.auth
 import com.udacity.project4.R
 import com.udacity.project4.authentication.AuthenticationActivity
 import com.udacity.project4.base.BaseFragment
@@ -20,19 +27,21 @@ class ReminderListFragment : BaseFragment() {
     // Use Koin to retrieve the ViewModel instance
     override val _viewModel: RemindersListViewModel by viewModel()
     private lateinit var binding: FragmentRemindersBinding
+    private lateinit var auth: FirebaseAuth
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = DataBindingUtil.inflate(inflater,
+        binding = DataBindingUtil.inflate(
+            inflater,
             R.layout.fragment_reminders, container, false
         )
         binding.viewModel = _viewModel
-
+        auth = Firebase.auth
         setHasOptionsMenu(true)
         setDisplayHomeAsUpEnabled(false)
-        setTitle(getString(R.string.app_name))
+        setTitle("Welcome " + auth.currentUser?.email)
         binding.refreshLayout.setOnRefreshListener { _viewModel.loadReminders() }
         return binding.root
     }

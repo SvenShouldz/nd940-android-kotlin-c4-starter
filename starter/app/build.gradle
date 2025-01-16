@@ -33,7 +33,9 @@ android {
         includeAndroidResources = true
         returnDefaultValues = true
     }
-
+    viewBinding {
+        enabled = true
+    }
     buildFeatures {
         dataBinding true
         buildConfig true
