@@ -53,14 +53,16 @@ class SignUpFragment : Fragment() {
     }
 
     private fun navigateToReminders() {
+        binding.progressBar.visibility = View.GONE
         findNavController().navigate(R.id.action_signUpFragment_to_loginFragment)
     }
 
     private fun showLoading() {
-        // Show a loading indicator
+        binding.progressBar.visibility = View.VISIBLE
     }
 
     private fun showErrorMessage() {
+        binding.progressBar.visibility = View.GONE
         Toast.makeText(requireContext(), "Sign up failed. Please try again.", Toast.LENGTH_SHORT)
             .show()
     }

@@ -1,8 +1,6 @@
 package com.udacity.project4.authentication
 
-import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,7 +12,6 @@ import androidx.navigation.fragment.findNavController
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract
 import com.udacity.project4.R
 import com.udacity.project4.databinding.FragmentLoginBinding
-import com.udacity.project4.locationreminders.RemindersActivity
 
 class LoginFragment : Fragment() {
 
@@ -54,9 +51,11 @@ class LoginFragment : Fragment() {
         }
         // Observe Login State
         viewModel.loginState.observe(viewLifecycleOwner) { state ->
-            Log.d("CLICK", state.toString())
             when (state) {
-                AuthenticationViewModel.LoginState.SUCCESS -> (activity as AuthenticationActivity).navigateToReminders()
+                AuthenticationViewModel.LoginState.SUCCESS -> {
+                    binding.progressBar.visibility = View.GONE
+                    (activity as AuthenticationActivity).navigateToReminders()
+                }
                 AuthenticationViewModel.LoginState.ERROR -> showErrorMessage()
                 AuthenticationViewModel.LoginState.LOADING -> showLoading()
             }
@@ -64,12 +63,13 @@ class LoginFragment : Fragment() {
     }
 
     private fun showErrorMessage() {
+        binding.progressBar.visibility = View.GONE
         Toast.makeText(requireContext(), "Login failed. Please try again.", Toast.LENGTH_SHORT)
             .show()
     }
 
     private fun showLoading() {
-        // Show a loading indicator
+        binding.progressBar.visibility = View.VISIBLE
     }
 }
 
