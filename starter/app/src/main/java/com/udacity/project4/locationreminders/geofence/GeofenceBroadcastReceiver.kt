@@ -3,6 +3,8 @@ package com.udacity.project4.locationreminders.geofence
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.util.Log
+import com.google.android.gms.location.GeofencingEvent
 
 /**
  * Triggered by the Geofence.  Since we can have many Geofences at once, we pull the request
@@ -15,6 +17,15 @@ import android.content.Intent
  */
 class GeofenceBroadcastReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        // TODO: implement the onReceive method to receive the geofencing events at the background
+        if (GeofencingEvent.fromIntent(intent)?.hasError() == true) {
+            Log.e("Geofence", "Geofencing error occurred.")
+            return
+        }
+
+        val geofencingEvent = GeofencingEvent.fromIntent(intent)
+        geofencingEvent?.triggeringGeofences?.forEach { geofence ->
+            Log.d("Geofence", "Triggered Geofence: ${geofence.requestId}")
+            // Handle geofence trigger logic here
+        }
     }
 }

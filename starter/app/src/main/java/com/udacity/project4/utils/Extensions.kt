@@ -1,13 +1,18 @@
 package com.udacity.project4.utils
 
+import android.Manifest
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
+import android.view.Gravity
 import android.view.View
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.udacity.project4.base.BaseRecyclerViewAdapter
+import com.udacity.project4.locationreminders.savereminder.SaveReminderFragment.Companion.REQUEST_LOCATION
 
 /**
  * Extension function to setup the RecyclerView.
@@ -31,6 +36,22 @@ fun Fragment.setDisplayHomeAsUpEnabled(bool: Boolean) {
     if (activity is AppCompatActivity) {
         (activity as AppCompatActivity).supportActionBar?.setDisplayHomeAsUpEnabled(
             bool
+        )
+    }
+}
+
+fun Fragment.showToast(text: String, position: Int) {
+    val toast = Toast.makeText(requireContext(), text, Toast.LENGTH_SHORT)
+    toast.setGravity(position, 0, 0)
+    toast.show()
+}
+
+fun Fragment.requestPermission() {
+    activity?.let {
+        ActivityCompat.requestPermissions(
+            it,
+            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+            REQUEST_LOCATION
         )
     }
 }

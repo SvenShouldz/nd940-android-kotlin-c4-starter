@@ -93,12 +93,8 @@ class ReminderListFragment : BaseFragment() {
     private fun logout() {
         // Sign out from Firebase Authentication
         FirebaseAuth.getInstance().signOut()
-
-        // Optionally, you can also clear any other session data if needed
-
         // Redirect the user to the AuthenticationActivity (login screen)
         val intent = Intent(context, AuthenticationActivity::class.java)
         startActivity(intent)
-        //finish() // Optional: Close the current activity
     }
 }

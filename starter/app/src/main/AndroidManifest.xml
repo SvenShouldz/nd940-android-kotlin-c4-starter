@@ -38,12 +38,7 @@
         -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="YOUR_API_KEY" />
-
-        <activity
-            android:name=".maps.MapsActivity"
-            android:exported="false"
-            android:label="@string/title_activity_maps" />
+            android:value="@string/google_maps_key" />
         <activity android:name=".locationreminders.ReminderDescriptionActivity" />
         <activity
             android:name=".authentication.AuthenticationActivity"
