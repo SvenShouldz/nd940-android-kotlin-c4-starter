@@ -3,7 +3,6 @@ package com.udacity.project4.locationreminders.savereminder
 import android.app.Application
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.google.android.gms.maps.model.PointOfInterest
 import com.udacity.project4.R
 import com.udacity.project4.base.BaseViewModel
 import com.udacity.project4.base.NavigationCommand
@@ -19,6 +18,7 @@ class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSo
     val reminderSelectedLocationStr = MutableLiveData<String?>()
     val latitude = MutableLiveData<Double?>()
     val longitude = MutableLiveData<Double?>()
+    val geofenceRadius = MutableLiveData<Float?>()
 
     /**
      * Clear the live data objects to start fresh next time the view model gets called
@@ -29,9 +29,10 @@ class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSo
         reminderSelectedLocationStr.value = null
         latitude.value = null
         longitude.value = null
+        geofenceRadius.value = null
     }
 
-    fun setSelectedLocation(lat: Double, lng: Double){
+    fun setSelectedLocation(lat: Double, lng: Double) {
         latitude.value = lat
         longitude.value = lng
         reminderSelectedLocationStr.value = "Lat: $lat, Lng: $lng"
@@ -44,9 +45,12 @@ class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSo
     /**
      * Validate the entered data then saves the reminder data to the DataSource
      */
-    fun validateAndSaveReminder(reminderData: ReminderDataItem) {
-        if (validateEnteredData(reminderData)) {
+    fun validateAndSaveReminder(reminderData: ReminderDataItem): Boolean {
+        return if (validateEnteredData(reminderData)) {
             saveReminder(reminderData)
+            true
+        } else {
+            false
         }
     }
 
@@ -63,6 +67,7 @@ class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSo
                     reminderData.location,
                     reminderData.latitude,
                     reminderData.longitude,
+                    reminderData.geofence,
                     reminderData.id
                 )
             )

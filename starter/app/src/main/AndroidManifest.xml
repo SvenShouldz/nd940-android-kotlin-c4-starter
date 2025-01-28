@@ -10,7 +10,6 @@
     -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <!--         The BACKGROUND_LOCATION permission is required for geofencing functionality to work on Q+ -->
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -25,21 +24,12 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
 
-        <!--
-             TODO: Before you run your application, you need a Google Maps API key.
-
-             To get one, follow the directions here:
-
-                https://developers.google.com/maps/documentation/android-sdk/get-api-key
-
-             Once you have your API key (it starts with "AIza"), define a new property in your
-             project's local.properties file (e.g. MAPS_API_KEY=Aiza...), and replace the
-             "YOUR_API_KEY" string in this file with "${MAPS_API_KEY}".
-        -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
+
         <activity android:name=".locationreminders.ReminderDescriptionActivity" />
+
         <activity
             android:name=".authentication.AuthenticationActivity"
             android:exported="true">
@@ -49,16 +39,22 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".locationreminders.RemindersActivity"
             android:exported="true"
-            android:theme="@style/ReminderTheme"></activity>
+            android:theme="@style/ReminderTheme">
+
+        </activity>
 
         <receiver
             android:name=".locationreminders.geofence.GeofenceBroadcastReceiver"
             android:enabled="true"
-            android:exported="true" />
-
+            android:exported="true">
+            <intent-filter>
+                <action android:name=".locationreminders.geofence.GEOFENCE_TRANSITION" />
+            </intent-filter>
+        </receiver>
         <service
             android:name=".locationreminders.geofence.GeofenceTransitionsJobIntentService"
             android:exported="true"
