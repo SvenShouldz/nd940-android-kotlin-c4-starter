@@ -6,11 +6,18 @@ import android.util.Log
 import androidx.core.app.JobIntentService
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingEvent
+import com.udacity.project4.locationreminders.ReminderDescriptionActivity.Companion.EXTRA_ReminderDataItem
+import com.udacity.project4.locationreminders.data.ReminderDataSource
+import com.udacity.project4.locationreminders.data.dto.ReminderDTO
+import com.udacity.project4.locationreminders.data.dto.Result
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import com.udacity.project4.utils.sendNotification
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
 import kotlin.coroutines.CoroutineContext
 
 class GeofenceTransitionsJobIntentService : JobIntentService(), CoroutineScope {
@@ -38,24 +45,40 @@ class GeofenceTransitionsJobIntentService : JobIntentService(), CoroutineScope {
     override fun onHandleWork(intent: Intent) {
         // Parse the geofencing event from the intent
         val geofencingEvent = GeofencingEvent.fromIntent(intent)
+        val geofencingTrigger = geofencingEvent?.triggeringGeofences
+        val remindersLocalRepository: ReminderDataSource by inject()
+        val geofenceTransition = geofencingEvent?.geofenceTransition
 
         if (geofencingEvent?.hasError() == true) {
             Log.e("GEOFENCE", "Geofencing event error: ${geofencingEvent.errorCode}")
             return
         }
 
-        val geofenceTransition = geofencingEvent?.geofenceTransition
         if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
             Log.d("GEOFENCE", "Geofence transition ENTER detected")
-
-            // Extract the ReminderDataItem directly from the intent
-//            val reminderDataItem =
-//                intent.getSerializableExtra("EXTRA_ReminderDataItem") as? ReminderDataItem
-//            if (reminderDataItem != null) {
-//                sendNotification(reminderDataItem)
-//            } else {
-//                Log.e("GEOFENCE", "ReminderDataItem not found in intent extras")
-//            }
+            CoroutineScope(coroutineContext).launch(SupervisorJob()) {
+                //get the reminder with the request id
+                if (geofencingTrigger != null) {
+                    for (geofence in geofencingTrigger) {
+                        val result = remindersLocalRepository.getReminder(geofence.requestId)
+                        if (result is Result.Success<ReminderDTO>) {
+                            val data = result.data
+                            //send a notification to the user with the reminder details
+                            sendNotification(
+                                ReminderDataItem(
+                                    data.title,
+                                    data.description,
+                                    data.location,
+                                    data.latitude,
+                                    data.longitude,
+                                    data.geofence,
+                                    data.id
+                                )
+                            )
+                        }
+                    }
+                }
+            }
         } else {
             Log.d("GEOFENCE", "Unhandled geofence transition type: $geofenceTransition")
         }
