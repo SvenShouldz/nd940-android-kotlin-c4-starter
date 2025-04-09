@@ -50,7 +50,7 @@
         <receiver
             android:name=".locationreminders.geofence.GeofenceBroadcastReceiver"
             android:enabled="true"
-            android:exported="true">
+            android:exported="false">
             <intent-filter>
                 <action android:name=".locationreminders.geofence.GEOFENCE_TRANSITION" />
             </intent-filter>

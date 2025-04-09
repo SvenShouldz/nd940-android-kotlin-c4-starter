@@ -1,13 +1,10 @@
 package com.udacity.project4.locationreminders.savereminder
 
 import android.Manifest
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.location.Location
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -19,9 +16,7 @@ import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.MutableLiveData
 import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofencingClient
-import com.google.android.gms.location.GeofencingRequest
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
@@ -37,8 +32,6 @@ import com.udacity.project4.R
 import com.udacity.project4.base.BaseFragment
 import com.udacity.project4.base.NavigationCommand
 import com.udacity.project4.databinding.FragmentSaveReminderBinding
-import com.udacity.project4.locationreminders.ReminderDescriptionActivity.Companion.EXTRA_ReminderDataItem
-import com.udacity.project4.locationreminders.geofence.GeofenceBroadcastReceiver
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
 import com.udacity.project4.utils.drawGeofenceCircle
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
@@ -172,6 +165,7 @@ class SaveReminderFragment : BaseFragment() {
             )
             return
         }
+
         fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, null)
     }
 
@@ -198,15 +192,13 @@ class SaveReminderFragment : BaseFragment() {
             _viewModel.longitude.value,
             _viewModel.geofenceRadius.value
         )
-        if (_viewModel.validateAndSaveReminder(reminder)) {
-            if (ActivityCompat.checkSelfPermission(
-                    requireContext(),
-                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-            ) {
-                addGeofence(reminder)
-                Log.d("GEOFENCE", "WIRD ERSTELLT")
-            }
+        if (ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            _viewModel.validateAndSaveReminder(reminder)
+            Log.d("GEOFENCE", "REMINDER SAVED")
         }
     }
 
@@ -236,61 +228,6 @@ class SaveReminderFragment : BaseFragment() {
             e.printStackTrace()
             return getString(R.string.error_happened)
         }
-    }
-
-    private fun addGeofence(reminder: ReminderDataItem) {
-        val geofence = Geofence.Builder()
-            .setRequestId(reminder.id)
-            .setCircularRegion(
-                reminder.latitude ?: return,
-                reminder.longitude ?: return,
-                (reminder.geofence ?: 100f)
-            )
-            .setExpirationDuration(Geofence.NEVER_EXPIRE)
-            .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER)
-            .build()
-
-        val geofencingRequest = GeofencingRequest.Builder().apply {
-            setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
-            addGeofence(geofence)
-        }.build()
-
-        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
-        } else {
-            PendingIntent.FLAG_UPDATE_CURRENT
-        }
-
-        val geofencePendingIntent: PendingIntent = PendingIntent.getBroadcast(
-            context,
-            0,
-            Intent(
-                context,
-                GeofenceBroadcastReceiver::class.java
-            ).setAction(".locationreminders.geofence.GEOFENCE_TRANSITION").apply {
-                putExtra(EXTRA_ReminderDataItem, reminder)
-            }, flags
-        )
-
-        // Permission Check
-        if (ActivityCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-            return
-        }
-
-        geofencingClient.addGeofences(geofencingRequest, geofencePendingIntent).run {
-            addOnSuccessListener {
-                Log.d("GEOFENCE", "Geofence added successfully!")
-            }
-            addOnFailureListener { exception ->
-                Log.d("GEOFENCE", "Failed to add geofence: ${exception.message}")
-            }
-        }
-
     }
 
     private fun navigateToSelectLocation() {

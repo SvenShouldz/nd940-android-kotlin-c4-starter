@@ -2,6 +2,7 @@ package com.udacity.project4.locationreminders.reminderslist
 
 import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
@@ -13,6 +14,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
@@ -22,6 +24,7 @@ import com.udacity.project4.authentication.AuthenticationActivity
 import com.udacity.project4.base.BaseFragment
 import com.udacity.project4.base.NavigationCommand
 import com.udacity.project4.databinding.FragmentRemindersBinding
+import com.udacity.project4.utils.sendNotification
 import com.udacity.project4.utils.setDisplayHomeAsUpEnabled
 import com.udacity.project4.utils.setTitle
 import com.udacity.project4.utils.setup
@@ -36,9 +39,20 @@ class ReminderListFragment : BaseFragment() {
     private lateinit var binding: FragmentRemindersBinding
     private lateinit var auth: FirebaseAuth
 
-    // ActivityResultLauncher to request location permission
-    private val requestPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { _ -> }
+    // Launcher for notification permission (Android 13+)
+    private val notificationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) {
+            // Proceed to location permissions regardless of result
+            checkLocationPermission()
+        }
+
+    // Launcher for fine location permission
+    private val fineLocationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            if (isGranted) {
+                checkBackgroundLocationPermission()
+            }
+        }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -61,8 +75,7 @@ class ReminderListFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.lifecycleOwner = this
         setupRecyclerView()
-        checkPermission()
-        requestBackgroundLocationPermission()
+        checkPermissionsSequentially()
         binding.addReminderFAB.setOnClickListener {
             navigateToAddReminder()
         }
@@ -70,12 +83,11 @@ class ReminderListFragment : BaseFragment() {
 
     override fun onResume() {
         super.onResume()
-        // Load the reminders list on the ui
+        // Load the reminders list on the UI
         _viewModel.loadReminders()
     }
 
     private fun navigateToAddReminder() {
-        // Use the navigationCommand live data to navigate between the fragments
         _viewModel.navigationCommand.postValue(
             NavigationCommand.To(ReminderListFragmentDirections.toSaveReminder())
         )
@@ -83,86 +95,79 @@ class ReminderListFragment : BaseFragment() {
 
     private fun setupRecyclerView() {
         val adapter = RemindersListAdapter {}
-        // Setup the recycler view using the extension function
         binding.reminderssRecyclerView.setup(adapter)
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
-        // Display logout as menu item
         inflater.inflate(R.menu.main_menu, menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.logout -> {
-                logout()
-            }
+            R.id.logout -> logout()
         }
         return super.onOptionsItemSelected(item)
     }
 
-    // Function to handle logout
     private fun logout() {
-        // Sign out from Firebase Authentication
         FirebaseAuth.getInstance().signOut()
-        // Redirect the user to the AuthenticationActivity (login screen)
         val intent = Intent(context, AuthenticationActivity::class.java)
         startActivity(intent)
     }
 
-    private fun checkPermission() {
+    private fun checkPermissionsSequentially() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.POST_NOTIFICATIONS)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            checkLocationPermission()
+        }
+    }
+
+    private fun checkLocationPermission() {
         when {
             shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) -> {
-                // Explain why you need the permission
                 showSnackbarWithOk(
                     "Location access is required for this feature. Please allow it.",
                     Gravity.TOP
-                ) { requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION) }
+                ) {
+                    fineLocationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                }
             }
-
             else -> {
-                // Request the permission
-                requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                fineLocationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
             }
         }
     }
 
-    // Function to request background location permission
-    private fun requestBackgroundLocationPermission() {
-        if (ActivityCompat.shouldShowRequestPermissionRationale(
-                requireActivity(),
+    private fun checkBackgroundLocationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+            ContextCompat.checkSelfPermission(
+                requireContext(),
                 Manifest.permission.ACCESS_BACKGROUND_LOCATION
-            )
+            ) != PackageManager.PERMISSION_GRANTED
         ) {
-            // Show rationale and then request the permission
-            showSnackbarWithOk(
-                "We need background location permission for geofencing to work while the app is in the background.",
-                Gravity.TOP
-            ) {
-                //requestPermissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION).toString())
-                requestPermissions()
+            if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
+                showSnackbarWithOk(
+                    "Background location is needed for geofencing to work in the background.",
+                    Gravity.TOP
+                ) {
+                    requestBackgroundLocation()
+                }
+            } else {
+                requestBackgroundLocation()
             }
-        } else {
-            // Directly request background location permission
-            requestPermissionLauncher.launch(arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION).toString())
         }
     }
 
-    private fun requestPermissions() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            ActivityCompat.requestPermissions(
-                requireActivity(), arrayOf(
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_BACKGROUND_LOCATION
-                ), 100
-            )
-        } else {
-            ActivityCompat.requestPermissions(
-                requireActivity(), arrayOf(
-                    Manifest.permission.ACCESS_FINE_LOCATION
-                ), 100
-            )
-        }
+    private fun requestBackgroundLocation() {
+        ActivityCompat.requestPermissions(
+            requireActivity(),
+            arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
+            101
+        )
     }
 }
