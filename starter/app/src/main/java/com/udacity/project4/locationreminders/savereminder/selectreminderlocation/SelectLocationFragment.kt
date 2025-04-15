@@ -2,7 +2,9 @@ package com.udacity.project4.locationreminders.savereminder.selectreminderlocati
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.content.res.Resources.NotFoundException
 import android.os.Bundle
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.Menu
@@ -16,6 +18,7 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.MarkerOptions
 import com.udacity.project4.R
 import com.udacity.project4.base.BaseFragment
@@ -52,7 +55,7 @@ class SelectLocationFragment : BaseFragment() {
         setDisplayHomeAsUpEnabled(true)
         setTitle("Select your Location")
         setupGoogleMap()
-        // TODO: add style to the map
+
 
         // Handle slider for radius
         binding.radiusSlider.addOnChangeListener { _, value, _ ->
@@ -106,6 +109,7 @@ class SelectLocationFragment : BaseFragment() {
             }
 
         }
+
     }
 
     private fun addMarkerAndMoveCamera(position: LatLng, title: String) {
@@ -134,12 +138,40 @@ class SelectLocationFragment : BaseFragment() {
             R.id.hybrid_map -> setMapType(GoogleMap.MAP_TYPE_HYBRID)
             R.id.satellite_map -> setMapType(GoogleMap.MAP_TYPE_SATELLITE)
             R.id.terrain_map -> setMapType(GoogleMap.MAP_TYPE_TERRAIN)
+            R.id.custom_map -> setCustomMapType()
             else -> super.onOptionsItemSelected(item)
         }
     }
 
     private fun setMapType(mapType: Int): Boolean {
+        googleMap.setMapStyle(null) // reset style
         googleMap.mapType = mapType
+        return true
+    }
+
+    private fun setCustomMapType(): Boolean {
+        try {
+            val styleOptions = MapStyleOptions.loadRawResourceStyle(
+                requireContext(), R.raw.mapstyle
+            )
+            val success: Boolean = googleMap.setMapStyle(styleOptions)
+
+            if (!success) {
+                showToast("Failed to apply custom style", Gravity.CENTER)
+            } else {
+                Log.d("SelectLocationFragment", "Custom map style applied successfully.")
+                // Optional: Set map type to normal if needed, as custom style overrides type visuals
+                //googleMap.mapType = GoogleMap.MAP_TYPE_NORMAL
+            }
+        } catch (e: NotFoundException) {
+            Log.e("SelectLocationFragment", "Can't find style resource. Error: ", e)
+            showToast("Cannot find style resource", Gravity.CENTER)
+            return false
+        } catch (e: Exception) {
+            Log.e("SelectLocationFragment", "Error applying map style: ", e)
+            showToast("Error applying style", Gravity.CENTER)
+            return false
+        }
         return true
     }
 
