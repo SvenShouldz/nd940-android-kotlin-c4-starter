@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.location.Location
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -42,13 +43,11 @@ import java.util.Locale
 
 class SaveReminderFragment : BaseFragment() {
 
-    // Get the view model this time as a single to be shared with the another fragment
     override val _viewModel: SaveReminderViewModel by inject()
     private lateinit var binding: FragmentSaveReminderBinding
 
     private lateinit var googleMap: GoogleMap
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
-    private lateinit var geofencingClient: GeofencingClient
 
     // Permission launcher for requesting location permission
     private val requestPermissionLauncher = registerForActivityResult(
@@ -75,11 +74,10 @@ class SaveReminderFragment : BaseFragment() {
         fusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(requireActivity())
         setDisplayHomeAsUpEnabled(true)
-        setTitle("Save Reminder")
+        setTitle(getString(R.string.save_reminder))
         setupGoogleMap()
-        geofencingClient = LocationServices.getGeofencingClient(requireContext())
         binding.selectLocation.setOnClickListener { navigateToSelectLocation() }
-        binding.saveReminder.setOnClickListener { saveReminder(context) }
+        binding.saveReminder.setOnClickListener { saveReminder(requireContext()) }
 
         return binding.root
     }
@@ -183,7 +181,7 @@ class SaveReminderFragment : BaseFragment() {
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultPosition, 12f))
     }
 
-    private fun saveReminder(context: Context?) {
+    private fun saveReminder(context: Context) {
         val reminder = ReminderDataItem(
             _viewModel.reminderTitle.value,
             _viewModel.reminderDescription.value,
@@ -192,13 +190,26 @@ class SaveReminderFragment : BaseFragment() {
             _viewModel.longitude.value,
             _viewModel.geofenceRadius.value
         )
-        if (ActivityCompat.checkSelfPermission(
-                requireContext(),
-                Manifest.permission.ACCESS_BACKGROUND_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            _viewModel.validateAndSaveReminder(reminder)
-            Log.d("GEOFENCE", "REMINDER SAVED")
+        if (_viewModel.validateEnteredData(reminder)) {
+            // Check for background permission ONLY on Android 10 (API 29) and higher
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                if (ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
+                    // API 29+ and permission granted: Save reminder via ViewModel
+                    _viewModel.saveReminder(reminder)
+                    Log.d("SaveReminder", "REMINDER SAVED (API 29+ with permission)")
+                } else {
+                    _viewModel.showSnackBarInt.value = R.string.error_background_location_permission_required
+                    Log.w("SaveReminder", "Background permission denied on API 29+")
+                }
+            } else {
+                // API 28 or lower: Background permission doesn't apply, proceed to save
+                _viewModel.saveReminder(reminder)
+                Log.d("SaveReminder", "REMINDER SAVED (API 28 or lower)")
+            }
         }
     }
 

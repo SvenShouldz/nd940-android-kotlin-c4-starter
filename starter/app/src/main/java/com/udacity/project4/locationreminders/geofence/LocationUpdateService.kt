@@ -52,9 +52,6 @@ class LocationUpdateService : Service() {
                 for (location in locationResult.locations) {
                     // THIS LINE ALREADY LOGS THE LOCATION!
                     Log.d(TAG, "New Location: ${location.latitude}, ${location.longitude}")
-
-                    // TODO: Process the location update here
-                    // e.g., broadcast it, save it, check geofences, etc.
                 }
             }
         }

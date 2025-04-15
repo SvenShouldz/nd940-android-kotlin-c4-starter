@@ -30,7 +30,8 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <activity android:name=".locationreminders.ReminderDescriptionActivity" />
+        <activity android:name=".locationreminders.ReminderDescriptionActivity"
+            android:theme="@style/ReminderTheme"/>
 
         <activity
             android:name=".authentication.AuthenticationActivity"
