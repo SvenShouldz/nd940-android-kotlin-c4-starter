@@ -1,11 +1,12 @@
 <resources>
     <string name="app_name">Location Reminders</string>
     <string name="error_happened">Error happened</string>
+    <string name="error_location">Unknown Location</string>
     <string name="retry">Retry</string>
     <string name="no_data">No Data</string>
     <string name="reminder_title">Reminder Title</string>
     <string name="reminder_desc">Description</string>
-    <string name="reminder_location">Reminder Location</string>
+    <string name="reminder_location">Set Reminder Location</string>
     <string name="save">Save</string>
     <string name="reminder_saved">Reminder Saved !</string>
     <string name="logout">Logout</string>
@@ -16,6 +17,7 @@
     <string name="hybrid_map">Hybrid Map</string>
     <string name="satellite_map">Satellite Map</string>
     <string name="terrain_map">Terrain Map</string>
+    <string name="custom_map">Custom Map</string>
     <string name="lat_long_snippet">Lat: %1$.5f, Long: %2$.5f</string>
     <string name="dropped_pin">Dropped Pin</string>
     <string name="poi">poi</string>
@@ -33,6 +35,7 @@
     <string name="welcome">Welcome</string>
     <string name="err_enter_title">Please enter title</string>
     <string name="err_select_location">Please select location</string>
+    <string name="lat_long_format">Lat: %.4f, Lng: %.4f</string>
 
     <!-- Error strings -->
     <string name="geofence_unknown_error">Unknown error: the Geofence service is not available now.</string>
@@ -40,4 +43,7 @@
     <string name="geofence_too_many_geofences">Your app has registered too many geofences.</string>
     <string name="geofence_too_many_pending_intents">You have provided too many PendingIntents to the addGeofences() call.</string>
     <string name="error_adding_geofence">Error Happened, Can\'t Add Geofence</string>
+    <string name="save_reminder">Save Reminder</string>
+    <string name="error_background_location_permission_required">Background Location permission is required.</string>
+    <string name="add_location_reminder">Add Location Reminder</string>
 </resources>

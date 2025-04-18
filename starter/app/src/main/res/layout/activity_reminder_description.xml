@@ -4,30 +4,131 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-        <!-- Data item that holds the reminder details -->
+
         <variable
             name="reminderDataItem"
             type="com.udacity.project4.locationreminders.reminderslist.ReminderDataItem" />
     </data>
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center"
-        android:orientation="vertical"
+        android:padding="16dp"
         tools:context=".locationreminders.ReminderDescriptionActivity">
 
-        <!-- TODO: Add the design of the reminder details -->
-
         <TextView
-            android:layout_width="match_parent"
+            android:id="@+id/textViewTitleLabel"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="Reminder Details"
-            android:textSize="@dimen/text_size_large"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:text="Title:"
+            android:textSize="18sp"
+            android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-    </LinearLayout>
+
+        <TextView
+            android:id="@+id/textViewTitleValue"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="@{reminderDataItem.title}"
+            android:textSize="18sp"
+            app:layout_constraintBaseline_toBaselineOf="@id/textViewTitleLabel"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/textViewTitleLabel"
+            tools:text="Buy Groceries" />
+
+        <TextView
+            android:id="@+id/textViewDescLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Description:"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/textViewTitleValue" />
+
+        <TextView
+            android:id="@+id/textViewDescValue"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="@{reminderDataItem.description}"
+            android:textSize="18sp"
+            app:layout_constraintBaseline_toBaselineOf="@id/textViewDescLabel"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/textViewDescLabel"
+            tools:text="Remember milk, eggs, and bread." />
+
+        <TextView
+            android:id="@+id/textViewLocationLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Location:"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/textViewDescValue" />
+
+        <TextView
+            android:id="@+id/textViewLocationValue"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="@{reminderDataItem.location}"
+            android:textSize="18sp"
+            app:layout_constraintBaseline_toBaselineOf="@id/textViewLocationLabel"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/textViewLocationLabel"
+            tools:text="Supermarket Downtown" />
+
+        <TextView
+            android:id="@+id/textViewCoordsLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Coordinates:"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/textViewLocationValue" />
+
+        <TextView
+            android:id="@+id/textViewCoordsValue"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="@{String.format(@string/lat_long_format, reminderDataItem.latitude, reminderDataItem.longitude)}"
+            android:textSize="18sp"
+            app:layout_constraintBaseline_toBaselineOf="@id/textViewCoordsLabel"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/textViewCoordsLabel"
+            tools:text="Lat: 40.7128, Lng: -74.0060" />
+
+        <TextView
+            android:id="@+id/textViewRadiusLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Radius (m):"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/textViewCoordsValue" />
+
+        <TextView
+            android:id="@+id/textViewRadiusValue"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="@{String.valueOf(reminderDataItem.geofence)}"
+            android:textSize="18sp"
+            app:layout_constraintBaseline_toBaselineOf="@id/textViewRadiusLabel"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/textViewRadiusLabel"
+            tools:text="100.0" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

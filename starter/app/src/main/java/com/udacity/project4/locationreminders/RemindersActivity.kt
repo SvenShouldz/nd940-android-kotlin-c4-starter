@@ -3,7 +3,8 @@ package com.udacity.project4.locationreminders
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.findNavController
+import com.udacity.project4.R
 import com.udacity.project4.databinding.ActivityRemindersBinding
 
 /**
@@ -22,7 +23,13 @@ class RemindersActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             android.R.id.home -> {
-                (binding.navHostFragment as NavHostFragment).navController.popBackStack()
+                val navController = findNavController(R.id.nav_host_fragment)
+
+                // Check if back navigation is possible
+                if (!navController.popBackStack()) {
+                    // If not possible, finish the activity or perform other fallback
+                    finish()
+                }
                 return true
             }
         }
