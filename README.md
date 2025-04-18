@@ -40,13 +40,17 @@ Right click on the `test` or `androidTest` packages and select Run Tests
 
 ### Break Down Tests
 
-Explain what each test does and why
+#### 1. `androidTest` (Instrumentation Tests - Require Device/Emulator)
 
-```
-1.androidTest
-        //TODO: Students explain their testing here.
-2. test
-        //TODO: Students explain their testing here.
+* **`RemindersDaoTest.kt`**: Checks if saving, getting, and deleting reminders in the Room database works correctly.
+* **`RemindersLocalRepositoryTest.kt`**: Tests if the repository correctly handles getting, saving, deleting, and finding specific reminders using the database.
+* **`ReminderListFragmentTest.kt`**: Verifies the reminder list screen UI: showing reminders, handling the "no data" case, navigating when the add button is clicked, and showing errors. Uses a fake data source.
+* **`RemindersActivityTest.kt`**: Performs a full End-to-End test of adding a reminder, including navigation, map interaction, saving, and checking validation errors. Uses the real database. Handles permissions.
+
+#### 2. `test` (Local Unit Tests - Run on JVM)
+
+* **`RemindersListViewModelTest.kt`**: Unit tests the list screen's ViewModel logic for loading reminders, showing loading/empty/error states. Uses a fake data source.
+* **`SaveReminderViewModelTest.kt`**: Unit tests the save screen's ViewModel logic for saving reminders, validating user input (title, location), and managing loading states. Uses a fake data source.
 ```
 
 ## Project Instructions
