@@ -169,7 +169,6 @@ class SaveReminderFragment : BaseFragment() {
 
     private fun updateMapWithLocation(location: Location) {
         val userLocation = LatLng(location.latitude, location.longitude)
-        _viewModel.setSelectedLocation(location.latitude, location.longitude)
         googleMap.clear()
         googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 12f))
     }
@@ -177,7 +176,6 @@ class SaveReminderFragment : BaseFragment() {
     // Set a default position if the location is not available or permission is denied
     private fun setDefaultPosition() {
         val defaultPosition = LatLng(52.5200, 13.4050) // Berlin
-        _viewModel.setSelectedLocation(defaultPosition.latitude, defaultPosition.longitude)
         googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultPosition, 12f))
     }
 

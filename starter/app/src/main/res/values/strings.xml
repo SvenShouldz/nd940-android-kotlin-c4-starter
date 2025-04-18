@@ -45,4 +45,5 @@
     <string name="error_adding_geofence">Error Happened, Can\'t Add Geofence</string>
     <string name="save_reminder">Save Reminder</string>
     <string name="error_background_location_permission_required">Background Location permission is required.</string>
+    <string name="add_location_reminder">Add Location Reminder</string>
 </resources>
