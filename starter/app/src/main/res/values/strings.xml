@@ -46,4 +46,6 @@
     <string name="save_reminder">Save Reminder</string>
     <string name="error_background_location_permission_required">Background Location permission is required.</string>
     <string name="add_location_reminder">Add Location Reminder</string>
+    <string name="selected_location">Selected Location</string>
+    <string name="error_saving_reminder">Error saving reminder</string>
 </resources>

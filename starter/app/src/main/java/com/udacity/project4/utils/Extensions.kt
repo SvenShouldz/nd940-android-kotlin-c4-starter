@@ -27,7 +27,6 @@ import com.udacity.project4.R
 import com.udacity.project4.base.BaseRecyclerViewAdapter
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.savereminder.SaveReminderFragment
-import com.udacity.project4.locationreminders.savereminder.SaveReminderFragment.Companion.REQUEST_LOCATION
 
 /**
  * Extension function to setup the RecyclerView.
@@ -117,7 +116,7 @@ fun Fragment.requestPermission() {
         ActivityCompat.requestPermissions(
             it,
             arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-            REQUEST_LOCATION
+            1001
         )
     }
 }

@@ -13,8 +13,8 @@ import androidx.test.espresso.Root
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.closeSoftKeyboard
 import androidx.test.espresso.action.ViewActions.typeText
-import androidx.test.espresso.assertion.ViewAssertions.matches // Import matches
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed // Import isDisplayed
+import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.rules.ActivityScenarioRule
@@ -61,7 +61,8 @@ class RemindersActivityTest : KoinTest {
     @get:Rule
     val grantPermissionRule: GrantPermissionRule = GrantPermissionRule.grant(
         Manifest.permission.ACCESS_FINE_LOCATION,
-        Manifest.permission.ACCESS_COARSE_LOCATION
+        Manifest.permission.ACCESS_COARSE_LOCATION,
+        Manifest.permission.ACCESS_BACKGROUND_LOCATION
     )
 
     // Registers Idling Resource & handles initial permissions
@@ -149,24 +150,24 @@ class RemindersActivityTest : KoinTest {
 
             val title = "E2E Test Title"
             val description = "E2E Test Description"
-            onView(withId(R.id.reminderTitleInput)).perform(typeText(title), closeSoftKeyboard())
-            onView(withId(R.id.reminderDescriptionInput)).perform(typeText(description), closeSoftKeyboard())
+            onView(withId(R.id.reminderTitleInput)).perform(typeText(title))
+            onView(withId(R.id.reminderDescriptionInput)).perform(
+                typeText(description),
+                closeSoftKeyboard()
+            )
 
             onView(withId(R.id.selectLocation)).perform(click())
 
             onView(withId(R.id.map_fragment)).perform(click())
-            onView(withId(R.id.confirm_button)).perform(click()) // Click confirm on SelectLocationFragment
 
-            // *** WAIT FOR NAVIGATION BACK TO SaveReminderFragment ***
-            Thread.sleep(1000) // Allow time for fragment transaction to complete
+            onView(withId(R.id.confirm_button)).perform(click())
 
-            // Check for view on SaveReminderFragment to ensure navigation happened
             onView(withId(R.id.reminderTitleInput)).check(matches(isDisplayed()))
 
-            // Now perform action on SaveReminderFragment
             onView(withId(R.id.saveReminder)).perform(click())
 
-            onView(withText(R.string.reminder_saved)).inRoot(ToastMatcher()).check(matches(isDisplayed()))
+            onView(withText(R.string.reminder_saved)).inRoot(ToastMatcher())
+                .check(matches(isDisplayed()))
             onView(withText(title)).check(matches(isDisplayed()))
             onView(withText(description)).check(matches(isDisplayed()))
         }
@@ -176,7 +177,10 @@ class RemindersActivityTest : KoinTest {
     @Test
     fun addReminder_emptyTitle_showsSnackbarError() {
         onView(withId(R.id.addReminderFAB)).perform(click())
-        onView(withId(R.id.reminderDescriptionInput)).perform(typeText("Only Desc"), closeSoftKeyboard())
+        onView(withId(R.id.reminderDescriptionInput)).perform(
+            typeText("Only Desc"),
+            closeSoftKeyboard()
+        )
         onView(withId(R.id.saveReminder)).perform(click())
 
         onView(withId(com.google.android.material.R.id.snackbar_text))
@@ -189,7 +193,10 @@ class RemindersActivityTest : KoinTest {
     fun addReminder_emptyLocation_showsSnackbarError() {
         onView(withId(R.id.addReminderFAB)).perform(click())
         onView(withId(R.id.reminderTitleInput)).perform(typeText("Title Only"), closeSoftKeyboard())
-        onView(withId(R.id.reminderDescriptionInput)).perform(typeText("Desc Only"), closeSoftKeyboard())
+        onView(withId(R.id.reminderDescriptionInput)).perform(
+            typeText("Desc Only"),
+            closeSoftKeyboard()
+        )
         onView(withId(R.id.saveReminder)).perform(click())
 
         // Check ViewModel logic if this still fails

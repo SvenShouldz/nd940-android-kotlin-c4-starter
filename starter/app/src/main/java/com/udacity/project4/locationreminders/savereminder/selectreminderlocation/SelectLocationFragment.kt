@@ -3,6 +3,7 @@ package com.udacity.project4.locationreminders.savereminder.selectreminderlocati
 import android.Manifest
 import android.content.pm.PackageManager
 import android.content.res.Resources.NotFoundException
+import android.location.Geocoder
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
@@ -31,6 +32,7 @@ import com.udacity.project4.utils.setTitle
 import com.udacity.project4.utils.showSnackbar
 import com.udacity.project4.utils.showToast
 import org.koin.android.ext.android.inject
+import java.util.Locale
 
 class SelectLocationFragment : BaseFragment() {
 
@@ -123,8 +125,7 @@ class SelectLocationFragment : BaseFragment() {
         _viewModel.latitude.value = latLng.latitude
         _viewModel.longitude.value = latLng.longitude
         _viewModel.geofenceRadius.value = radius
-        _viewModel.reminderSelectedLocationStr.value =
-            "Lat: ${latLng.latitude}, Lng: ${latLng.longitude}"
+        _viewModel.reminderSelectedLocationStr.value = getCityName(latLng)
         _viewModel.navigationCommand.value = NavigationCommand.Back
     }
 
@@ -173,6 +174,18 @@ class SelectLocationFragment : BaseFragment() {
             return false
         }
         return true
+    }
+
+    private fun getCityName(latLng: LatLng): String {
+        val geocoder = Geocoder(requireContext(), Locale.getDefault())
+        try {
+            @Suppress("DEPRECATION") // Necessary for getFromLocation below API 33
+            val addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1)
+            return addresses?.firstOrNull()?.locality?.takeIf { it.isNotBlank() }
+                ?: "lat: ${latLng.latitude}, lng: ${latLng.longitude}"
+        } catch (e: Exception) {
+            return "lat: ${latLng.latitude}, lng: ${latLng.longitude}"
+        }
     }
 
 }
