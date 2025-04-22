@@ -166,8 +166,6 @@ class RemindersActivityTest : KoinTest {
 
             onView(withId(R.id.confirm_button)).perform(click())
 
-            waitForView(withId(R.id.reminderTitleInput), timeoutMillis = 3000L)
-
             onView(withId(R.id.saveReminder)).perform(click())
 
             waitForView(withText(title), timeoutMillis = 2000L)
