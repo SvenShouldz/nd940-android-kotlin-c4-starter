@@ -9,7 +9,9 @@ import android.view.WindowManager
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingRegistry
+import androidx.test.espresso.NoMatchingViewException
 import androidx.test.espresso.Root
+import androidx.test.espresso.ViewInteraction
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.closeSoftKeyboard
 import androidx.test.espresso.action.ViewActions.typeText
@@ -32,8 +34,10 @@ import com.udacity.project4.locationreminders.data.local.RemindersLocalRepositor
 import com.udacity.project4.locationreminders.reminderslist.RemindersListViewModel
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import com.udacity.project4.util.DataBindingIdlingResource
+import junit.framework.AssertionFailedError
 import kotlinx.coroutines.runBlocking
 import org.hamcrest.Description
+import org.hamcrest.Matcher
 import org.hamcrest.TypeSafeMatcher
 import org.junit.After
 import org.junit.Before
@@ -142,7 +146,6 @@ class RemindersActivityTest : KoinTest {
         Log.d("PermissionHandler", "Finished checking for permission dialogs.")
     }
 
-    // Tests adding a valid reminder
     @Test
     fun addReminder_happyPath_savesAndDisplaysReminder() {
         runBlocking {
@@ -158,16 +161,19 @@ class RemindersActivityTest : KoinTest {
 
             onView(withId(R.id.selectLocation)).perform(click())
 
+            waitForView(withId(R.id.map_fragment), timeoutMillis = 3000L)
             onView(withId(R.id.map_fragment)).perform(click())
 
             onView(withId(R.id.confirm_button)).perform(click())
 
-            onView(withId(R.id.reminderTitleInput)).check(matches(isDisplayed()))
+            waitForView(withId(R.id.reminderTitleInput), timeoutMillis = 3000L)
 
             onView(withId(R.id.saveReminder)).perform(click())
 
+            waitForView(withText(title), timeoutMillis = 2000L)
             onView(withText(R.string.reminder_saved)).inRoot(ToastMatcher())
                 .check(matches(isDisplayed()))
+
             onView(withText(title)).check(matches(isDisplayed()))
             onView(withText(description)).check(matches(isDisplayed()))
         }
@@ -203,6 +209,30 @@ class RemindersActivityTest : KoinTest {
         onView(withId(com.google.android.material.R.id.snackbar_text))
             .check(matches(withText(R.string.err_select_location)))
             .check(matches(isDisplayed()))
+    }
+
+    // Utility function to wait for a view to be displayed
+    fun waitForView(
+        viewMatcher: Matcher<View>,
+        timeoutMillis: Long = 5000L,
+        checkIntervalMillis: Long = 100L
+    ): ViewInteraction {
+        val endTime = System.currentTimeMillis() + timeoutMillis
+        while (System.currentTimeMillis() < endTime) {
+            try {
+                val interaction = onView(viewMatcher)
+                interaction.check(matches(isDisplayed()))
+                return interaction // View found and displayed
+            } catch (e: NoMatchingViewException) {
+                Thread.sleep(checkIntervalMillis) // View not found yet
+            } catch (e: AssertionFailedError) {
+                Thread.sleep(checkIntervalMillis) // View found but not displayed yet
+            } catch (e: Exception) {
+                Thread.sleep(checkIntervalMillis) // Catch other potential Espresso errors during check
+            }
+        }
+        // Timeout reached, attempt final check to throw descriptive error
+        return onView(viewMatcher).check(matches(isDisplayed()))
     }
 }
 
