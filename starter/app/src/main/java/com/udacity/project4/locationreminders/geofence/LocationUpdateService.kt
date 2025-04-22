@@ -19,6 +19,8 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
+import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.model.MarkerOptions
 import com.udacity.project4.R
 
 
@@ -83,8 +85,6 @@ class LocationUpdateService : Service() {
     }
 
     private fun startForegroundService() {
-        val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-
         // Example Notification - customize as needed
         val notificationBuilder = NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
             .setAutoCancel(false)
@@ -157,4 +157,5 @@ class LocationUpdateService : Service() {
             manager?.createNotificationChannel(serviceChannel)
         }
     }
+
 }

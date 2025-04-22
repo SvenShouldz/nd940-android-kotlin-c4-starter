@@ -43,6 +43,7 @@ class SelectLocationFragment : BaseFragment() {
     private lateinit var googleMap: GoogleMap
     private var selectedPosition: LatLng? = null
     private var geofenceRadius: Float = 30f
+    private var poiTitle: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -88,8 +89,17 @@ class SelectLocationFragment : BaseFragment() {
 
             if (savedLat != null && savedLng != null) {
                 val savedPosition = LatLng(savedLat, savedLng)
-                googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(savedPosition, 15f))
+                // Draw existing selection if available
+                selectedPosition = savedPosition
+                addMarkerAndMoveCamera(savedPosition, _viewModel.reminderSelectedLocationStr.value ?: "Saved Location")
+                drawGeofenceCircle(savedPosition, _viewModel.geofenceRadius.value ?: geofenceRadius, googleMap)
+                // Move camera without animation initially
+                // googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(savedPosition, 15f))
+            } else {
+                // Move camera to default or user location if no saved position
+                // Keep existing MyLocation logic below
             }
+
 
             if (ContextCompat.checkSelfPermission(
                     requireContext(),
@@ -105,10 +115,12 @@ class SelectLocationFragment : BaseFragment() {
                 addMarkerAndMoveCamera(latLng, "Selected Location")
                 drawGeofenceCircle(latLng, geofenceRadius, googleMap)
                 showSnackbar(
-                    "Location selected: (${latLng.latitude}, ${latLng.longitude})",
+                    "Location selected: (${String.format("%.4f", latLng.latitude)}, ${String.format("%.4f", latLng.longitude)})", // Format coordinates
                     Gravity.TOP
                 )
             }
+
+            setPoiClick(googleMap) // Call POI click handler
 
         }
 
@@ -125,6 +137,7 @@ class SelectLocationFragment : BaseFragment() {
         _viewModel.latitude.value = latLng.latitude
         _viewModel.longitude.value = latLng.longitude
         _viewModel.geofenceRadius.value = radius
+        _viewModel.reminderTitle.value = poiTitle ?: _viewModel.reminderTitle.value
         _viewModel.reminderSelectedLocationStr.value = getCityName(latLng)
         _viewModel.navigationCommand.value = NavigationCommand.Back
     }
@@ -185,6 +198,26 @@ class SelectLocationFragment : BaseFragment() {
                 ?: "lat: ${latLng.latitude}, lng: ${latLng.longitude}"
         } catch (e: Exception) {
             return "lat: ${latLng.latitude}, lng: ${latLng.longitude}"
+        }
+    }
+
+    // Handles Point of Interest clicks
+    private fun setPoiClick(map: GoogleMap) {
+        map.setOnPoiClickListener { poi ->
+            googleMap.clear()
+            selectedPosition = poi.latLng
+            poiTitle = poi.name
+            val poiMarker = map.addMarker(
+                MarkerOptions()
+                    .position(poi.latLng)
+                    .title(poi.name)
+            )
+            drawGeofenceCircle(poi.latLng, geofenceRadius, googleMap)
+            poiMarker?.showInfoWindow()
+            showSnackbar(
+                "${poi.name} selected.",
+                Gravity.TOP
+            )
         }
     }
 
