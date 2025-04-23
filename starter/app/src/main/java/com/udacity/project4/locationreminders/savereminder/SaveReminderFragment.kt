@@ -430,8 +430,7 @@ class SaveReminderFragment : BaseFragment() {
 
     private fun requestBackgroundLocationPermission() {
         if (!isBackgroundLocationRequired()) return
-        ActivityCompat.requestPermissions(
-            requireActivity(),
+        requestPermissions(
             arrayOf(Manifest.permission.ACCESS_BACKGROUND_LOCATION),
             BACKGROUND_LOCATION_PERMISSION_REQUEST_CODE
         )
